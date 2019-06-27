@@ -4,16 +4,19 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import glob
 
+# user defined imports
+from undistort import undistortImage
+
 # Read calibration image
 images = glob.glob('../camera_cal/calibration*.jpg')
 
-criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+#criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 # images has 9x6 corners
 objPoints = [] # to hold 3D points in real world space
 imgPoints = [] # to hold 2D points in image space
 
-ny = 6
 nx = 9
+ny = 6
 # prepare object points
 objp = np.zeros((ny*nx, 3), np.float32)
 # leave Z coordinate as zero
@@ -43,15 +46,11 @@ for calImage in images:
 # here we have image points and object points which we can use to calibrate camera
 ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objPoints, imgPoints, shape, None, None)
 
-# now test whether distortion works or not
-testimage = mpimg.imread('../camera_cal/test_image.png')
-undist = cv2.undistort(testimage, mtx, dist, None, mtx)
-# From quiz to show original test image and undistorted image together
-f, (ax1, ax2) = plt.subplots(1, 2, figsize=(24, 9))
-f.tight_layout()
-ax1.imshow(testimage)
-ax1.set_title('Original Image', fontsize=50)
-ax2.imshow(undist)
-ax2.set_title('Undistorted Image', fontsize=50)
-plt.subplots_adjust(left=0., right=1, top=0.9, bottom=0.)
-plt.show()
+# save camera matrix and distortion coefficient for further use
+np.save('cameraMatrix.npy', mtx)
+np.save('distortionCoeff.npy', dist)
+
+# Uncomment below lines to verify camera calibration and image distortion correction
+# testimage = mpimg.imread('../test_images/test1.jpg')
+# undistortImage(testimage)
+
