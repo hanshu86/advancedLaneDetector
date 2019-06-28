@@ -39,6 +39,6 @@ def getWarpedImage(img):
 		warpedMatrix = createSavePerspectiveMatrix(img)
 
 	img_size = (img.shape[1], img.shape[0])
-	print(img_size)
+	#print(img_size)
 	warped = cv2.warpPerspective(img, warpedMatrix, img_size, flags=cv2.INTER_LINEAR)
 	return warped

@@ -38,6 +38,9 @@ def getThresholdBinaryImage(img, s_thresh=(170, 255), sobelx_thresh=(20, 100), d
 
     color_binary = np.zeros_like(binary_dir_output)
     color_binary[ ((sxbinary == 1) & (binary_dir_output == 1)) | (s_binary == 1) ] = 1
+    color_binary = color_binary * 255
+    # plt.imshow(color_binary)
+    # plt.show()
     # Stack each channel
     # color_binary = np.dstack(( np.zeros_like(sxbinary), sxbinary, s_binary)) * 255
     return color_binary
