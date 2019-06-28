@@ -21,11 +21,11 @@ def createSavePerspectiveMatrix(img):
 	#                     		[786, 0], # right top
 	#                     		[786,  600] ]) # right bottom
 
-	srcPoints = np.float32([ [256, 720], [610 , 430], [700, 430], [1100,  720] ])
+	srcPoints = np.float32([ [270, 683], [559 , 477], [734, 477], [1044,  675] ])
 
 	offset = 100
 	img_size = (img.shape[1], img.shape[0])
-	dstPoints = np.float32([ [offset, 720], [offset, 0], [ 300, 0], [img_size[1] - offset, 720]])
+	dstPoints = np.float32([ [offset, 720], [offset, 0], [ img_size[0] - 2*offset, 0], [img_size[0] - 2*offset, 720]])
 
 	persPectiveMatrix = cv2.getPerspectiveTransform(srcPoints, dstPoints)
 	np.save('persPectiveMatrix.npy', persPectiveMatrix)
@@ -33,7 +33,7 @@ def createSavePerspectiveMatrix(img):
 
 def getWarpedImage(img):
 	try:
-		warpedMatrix = np.load('persPectiveMatrix')
+		warpedMatrix = np.load('persPectiveMatrix.npy')
 	except:
 		print("Perspective Matrix Does not exists..create one")
 		warpedMatrix = createSavePerspectiveMatrix(img)

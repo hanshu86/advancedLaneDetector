@@ -10,9 +10,10 @@ from thresholdBinaryImage import *
 from showImageSideBySide import *
 from applyPerspectiveTransform import *
 
-testimage = mpimg.imread('../test_images/straight_lines2.jpg')
+# testimage = mpimg.imread('../test_images/straight_lines1.jpg')
+testimage = mpimg.imread('../test_images/test6.jpg')
 correctedImage = undistortImage(testimage)
-# showImageForComparison(testimage, correctedImage, "Original Image", "undistort Image")
+# # showImageForComparison(testimage, correctedImage, "Original Image", "undistort Image")
 warped = getWarpedImage(correctedImage)
 showImageForComparison(testimage, warped, "Original Image", "Warped Image")
 #binary_image = getThresholdBinaryImage(correctedImage)
