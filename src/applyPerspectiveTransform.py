@@ -28,7 +28,9 @@ def createSavePerspectiveMatrix(img):
 	dstPoints = np.float32([ [offset, 720], [offset, 0], [ img_size[0] - 2*offset, 0], [img_size[0] - 2*offset, 720]])
 
 	persPectiveMatrix = cv2.getPerspectiveTransform(srcPoints, dstPoints)
+	persPectiveMatrixInv = cv2.getPerspectiveTransform(dstPoints, srcPoints)
 	np.save('persPectiveMatrix.npy', persPectiveMatrix)
+	np.save('persPectiveMatrixInv.npy', persPectiveMatrixInv)
 	return persPectiveMatrix
 
 def getWarpedImage(img):
