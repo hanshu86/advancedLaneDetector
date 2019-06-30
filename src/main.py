@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import glob
 import sys
+from moviepy.editor import VideoFileClip
 
 # user defined imports
 from undistort import undistortImage
@@ -14,6 +15,7 @@ from fitPolynomial import *
 
 
 showOnlyFinalImage = True
+video = True
 
 # testimage = mpimg.imread('../test_images/straight_lines1.jpg')
 def advanced_lane_detection_pipeline(testimage):
@@ -39,12 +41,24 @@ def advanced_lane_detection_pipeline(testimage):
 	else:
 		text = "Radius: "+str(left_lane_radius_m)+"m" + "\noffset is at center: "+str(vehicle_offset_m)+"m"
 
-	if showOnlyFinalImage == False:
+	if (showOnlyFinalImage == False) and (video == False):
 		plt.text(400, 100, text, fontsize=12, color='white')
 		plt.imshow(final_image)
 		plt.show()
 
-	return final_image, text
+	if (video == True):
+		text = "Radius: "+str(left_lane_radius_m)+"m"
+		cv2.putText(final_image, text, (200,100), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), lineType=cv2.LINE_AA)
+		if vehicle_offset_m < 0:
+			text = "offset to left: "+str(abs(vehicle_offset_m))+"m"
+		elif vehicle_offset_m > 0:
+			text = "offset to right: "+str(vehicle_offset_m)+"m"
+		else:
+			text = "offset is at center: "+str(vehicle_offset_m)+"m"
+		cv2.putText(final_image, text, (200,140), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), lineType=cv2.LINE_AA)
+		return final_image
+	else:
+		return final_image, text
 
 
 
@@ -54,6 +68,7 @@ def main():
 
 	if arg == "images":
 		print("Advanced Lane detection on Images")
+		video = False
 		laneimages = glob.glob('../test_images/*.jpg')
 		for img in laneimages:
 			image = mpimg.imread(img)
@@ -62,6 +77,10 @@ def main():
 			break
 	elif arg == "video":
 		print("Advanced Lane detection on Video")
+		video = True
+		clip = VideoFileClip("../project_video.mp4")
+		white_clip = clip.fl_image(advanced_lane_detection_pipeline)
+		white_clip.write_videofile("../myprojectOutput.mp4", audio=False)
 	else:
 		print("Advanced Lane detection on Video")
 
