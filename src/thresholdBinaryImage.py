@@ -14,6 +14,10 @@ def getThresholdBinaryImage(img, s_thresh=(170, 255), sobelx_thresh=(20, 100), d
     l_channel = hls[:,:,1]
     s_channel = hls[:,:,2]
 
+    # plt.imshow(l_channel)
+    # plt.show()
+    # plt.imshow(s_channel)
+    # plt.show()
     # Sobel x on S-channel
     sobelx = cv2.Sobel(s_channel, cv2.CV_64F, 1, 0, ksize= sobel_kernel) # Take the derivative in x
     abs_sobelx = np.absolute(sobelx) # Absolute x derivative to accentuate lines away from horizontal
@@ -28,7 +32,7 @@ def getThresholdBinaryImage(img, s_thresh=(170, 255), sobelx_thresh=(20, 100), d
     binary_dir_output = np.zeros_like(sobelx)
     binary_dir_output[(grad_dir >= dir_thresh[0]) & (grad_dir <= dir_thresh[1])] = 1
 
-    # Threshold x gradient
+    # Threshold x gradient on S-channel
     sxbinary = np.zeros_like(scaled_sobel)
     sxbinary[(scaled_sobel >= sobelx_thresh[0]) & (scaled_sobel <= sobelx_thresh[1])] = 1
     
@@ -36,8 +40,11 @@ def getThresholdBinaryImage(img, s_thresh=(170, 255), sobelx_thresh=(20, 100), d
     s_binary = np.zeros_like(s_channel)
     s_binary[(s_channel >= s_thresh[0]) & (s_channel <= s_thresh[1])] = 1
 
+    sl_binary = np.zeros_like(l_channel)
+    sl_binary[(l_channel >= 70) & (l_channel <= s_thresh[1])] = 1
+
     color_binary = np.zeros_like(binary_dir_output)
-    color_binary[ ((sxbinary == 1) & (binary_dir_output == 1)) | (s_binary == 1) ] = 1
+    color_binary[ ((sxbinary == 1) & (binary_dir_output == 1)) & ((s_binary == 1) & (sl_binary == 1)) ] = 1
     color_binary = color_binary * 255
     # plt.imshow(color_binary)
     # plt.show()

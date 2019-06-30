@@ -5,6 +5,7 @@ import matplotlib.image as mpimg
 import glob
 import sys
 from moviepy.editor import VideoFileClip
+import os
 
 # user defined imports
 from undistort import undistortImage
@@ -19,17 +20,19 @@ video = True
 
 # testimage = mpimg.imread('../test_images/straight_lines1.jpg')
 def advanced_lane_detection_pipeline(testimage):
+	global showOnlyFinalImage
+	global video
 	# First correct image for distortion
 	correctedImage = undistortImage(testimage)
-	# showImageForComparison(testimage, correctedImage, "Original Image", "undistort Image")
+	# showImageForComparison(testimage, correctedImage, "Original Image", "undistort Image", gray_new_img=False, text=None)
 
 	# Then Apply perspective transformation to undistorted image
 	warpedImage = getWarpedImage(correctedImage)
-	# showImageForComparison(testimage, warpedImage, "Original Image", "Warped Image")
+	# showImageForComparison(testimage, warpedImage, "Original Image", "Warped Image", gray_new_img=False, text=None)
 
 	# Then apply binary threshold using sobel filter, color selection
 	binary_image = getThresholdBinaryImage(warpedImage)
-	#showImageForComparison(testimage, binary_image, "Original Image", "Binary Image", gray_new_img=True)
+	# showImageForComparison(testimage, binary_image, "Original Image", "Binary Image", gray_new_img=True, text=None)
 
 	final_image, left_lane_radius_m, right_lane_radius_m, vehicle_offset_m = fit_polynomial(binary_image, testimage, correctedImage, showOnlyFinalImage)
 
@@ -60,29 +63,38 @@ def advanced_lane_detection_pipeline(testimage):
 	else:
 		return final_image, text
 
+def extract_frames(images):
+	return images
 
 
 def main():
+	global showOnlyFinalImage
+	global video
 	# print command line arguments
 	arg  = sys.argv[1:][0] # only supporting first arg
-
 	if arg == "images":
 		print("Advanced Lane detection on Images")
 		video = False
-		laneimages = glob.glob('../test_images/*.jpg')
+		laneimages = glob.glob('../video_debug_image/videoImage*.jpg')
 		for img in laneimages:
+			print(img)
+			# img = "../video_debug_image/videoImage14.jpg"
 			image = mpimg.imread(img)
 			pipeline_output_image, text = advanced_lane_detection_pipeline(image)
 			showImageForComparison(image, pipeline_output_image, "Original Image", "Final Image", gray_new_img=False, text=text)
-			break
+			# break
 	elif arg == "video":
 		print("Advanced Lane detection on Video")
 		video = True
-		clip = VideoFileClip("../project_video.mp4")
-		white_clip = clip.fl_image(advanced_lane_detection_pipeline)
-		white_clip.write_videofile("../myprojectOutput.mp4", audio=False)
+		clip = VideoFileClip("../project_video.mp4").subclip(39, 39.6)
+		#Debugging as video between 39sec and 39.6 sec giving weird lane
+		clip.write_images_sequence("../video_debug_image/videoImage%01d.jpg")
+		#white_clip = clip.fl_image(advanced_lane_detection_pipeline)
+		#white_clip.write_videofile("../myprojectOutput.mp4", audio=False)
+
 	else:
 		print("Advanced Lane detection on Video")
+
 
 if __name__ == '__main__':
 	main()
