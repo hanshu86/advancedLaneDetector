@@ -36,6 +36,7 @@ def undistortImage(image):
 
 
 # Run image correction on "test Image"
-distortedImage = mpimage.imread('../camera_cal/test_image.png')
+# distortedImage = mpimage.imread('../camera_cal/test_image.png') #- This when testing chessboard image for undistortion
+distortedImage = mpimage.imread('../test_images/test1.jpg') # This when testing one of the lane detection test images
 imageCorr = undistortImage(distortedImage)
 showImageForComparison(distortedImage, imageCorr, "Original Image", "undistorted Image", gray_new_img=False, text=None)

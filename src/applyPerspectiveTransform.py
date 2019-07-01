@@ -1,7 +1,10 @@
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt 
-import matplotlib.image as mpimg
+import matplotlib.image as mpimage
+
+from undistort import undistortImage
+from showImageSideBySide import *
 
 # testimage = mpimg.imread('../examples/warped_straight_lines.jpg')
 # plt.imshow(testimage)
@@ -27,6 +30,7 @@ def createSavePerspectiveMatrix(img):
 	img_size = (img.shape[1], img.shape[0])
 	dstPoints = np.float32([ [offset, 720], [offset, 0], [ img_size[0] - 2*offset, 0], [img_size[0] - 2*offset, 720]])
 
+	print(dstPoints)
 	persPectiveMatrix = cv2.getPerspectiveTransform(srcPoints, dstPoints)
 	persPectiveMatrixInv = cv2.getPerspectiveTransform(dstPoints, srcPoints)
 	np.save('persPectiveMatrix.npy', persPectiveMatrix)
@@ -44,3 +48,9 @@ def getWarpedImage(img):
 	#print(img_size)
 	warped = cv2.warpPerspective(img, warpedMatrix, img_size, flags=cv2.INTER_LINEAR)
 	return warped
+
+
+distortedImage = mpimage.imread('../test_images/test1.jpg')
+imageCorr = undistortImage(distortedImage)
+warpedImg = getWarpedImage(imageCorr)
+showImageForComparison(distortedImage, warpedImg, "Original Image", "warped Image", gray_new_img=False, text=None)

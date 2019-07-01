@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import glob
 
-# user defined imports
-from undistort import undistortImage
 
 def doCameraCalibration():
 	# Read calibration image
