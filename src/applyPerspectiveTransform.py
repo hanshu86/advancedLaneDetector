@@ -50,7 +50,8 @@ def getWarpedImage(img):
 	return warped
 
 
-distortedImage = mpimage.imread('../test_images/test1.jpg')
-imageCorr = undistortImage(distortedImage)
-warpedImg = getWarpedImage(imageCorr)
-showImageForComparison(distortedImage, warpedImg, "Original Image", "warped Image", gray_new_img=False, text=None)
+# PLEASE UNCOMMENT ME FOR RUNNING THIS FILE ONLY
+# distortedImage = mpimage.imread('../test_images/test1.jpg')
+# imageCorr = undistortImage(distortedImage)
+# warpedImg = getWarpedImage(imageCorr)
+# showImageForComparison(distortedImage, warpedImg, "Original Image", "warped Image", gray_new_img=False, text=None)
