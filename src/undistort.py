@@ -1,7 +1,8 @@
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt 
-import matplotlib.image as mpimg
+import matplotlib.image as mpimage
+from showImageSideBySide import *
 
 # Flag to control undist and dist image show
 showUndisImage = False
@@ -25,3 +26,9 @@ def undistortImage(image):
 
 	# return undistorted image
 	return undist
+
+
+# Run image correction on "test Image"
+distortedImage = mpimage.imread('../camera_cal/test_image.png')
+imageCorr = undistortImage(distortedImage)
+showImageForComparison(distortedImage, imageCorr, "Original Image", "undistort Image", gray_new_img=False, text=None)
