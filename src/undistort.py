@@ -2,14 +2,21 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt 
 import matplotlib.image as mpimage
-from showImageSideBySide import *
 
-# Flag to control undist and dist image show
-showUndisImage = False
+from showImageSideBySide import *
+from cameraCalibration import *
+
 
 def undistortImage(image):
-	cameraMtx = np.load('cameraMatrix.npy')
-	cameraDistCoeff = np.load('distortionCoeff.npy')
+	# Flag to control undist and dist image show
+	showUndisImage = False
+	try:
+		cameraMtx = np.load('cameraMatrix.npy')
+		cameraDistCoeff = np.load('distortionCoeff.npy')
+	except:
+		print("Camera Matrix Does not exists..create one")
+		cameraMtx,cameraDistCoeff = doCameraCalibration(image)
+
 
 	# now test whether distortion works or not
 	undist = cv2.undistort(image, cameraMtx, cameraDistCoeff, None, cameraMtx)
@@ -31,4 +38,4 @@ def undistortImage(image):
 # Run image correction on "test Image"
 distortedImage = mpimage.imread('../camera_cal/test_image.png')
 imageCorr = undistortImage(distortedImage)
-showImageForComparison(distortedImage, imageCorr, "Original Image", "undistort Image", gray_new_img=False, text=None)
+showImageForComparison(distortedImage, imageCorr, "Original Image", "undistorted Image", gray_new_img=False, text=None)
