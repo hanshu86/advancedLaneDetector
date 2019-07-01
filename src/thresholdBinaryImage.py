@@ -3,50 +3,116 @@ import cv2
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
-def getThresholdBinaryImage(img, s_thresh=(170, 255), sobelx_thresh=(20, 100), dir_thresh=(0, np.pi/2), sobel_kernel=5):
+
+def getThresholdBinaryImage(img, s_thresh=(170, 255), sobelx_thresh=(50, 200), dir_thresh=(0, np.pi/8), sobel_kernel=5):
+    mag_thresh=(50, 255)
+    disablePlot = True
     # Convert to HLS color space and separate the V channel
     #image MUST be open using mpimg.imread(). If used cv2.imread
     # then change cv2.COLOR_RGB2HLS -> cv2.COLOR_BGR2HLS
     hls = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)
-    # store different channel. We will use S-CHANNEL as it gives better image
+    # store different channel. We will use S & L -CHANNEL as it gives better image
   	# for lane detection
     h_channel = hls[:,:,0]
     l_channel = hls[:,:,1]
     s_channel = hls[:,:,2]
 
-    # plt.imshow(l_channel)
-    # plt.show()
-    # plt.imshow(s_channel)
-    # plt.show()
-    # Sobel x on S-channel
-    sobelx = cv2.Sobel(s_channel, cv2.CV_64F, 1, 0, ksize= sobel_kernel) # Take the derivative in x
+    if disablePlot == False:
+        plt.imshow(l_channel)
+        plt.text(100,200, "L - Channel", fontsize=12, color='white')
+       	plt.show()
+        plt.imshow(s_channel)
+        plt.text(100,200, "S - Channel", fontsize=12, color='white')
+        plt.show()
+        plt.imshow(h_channel)
+        plt.text(100,200, "H - Channel", fontsize=12, color='white')
+        plt.show()
+    # Gradient on X direction
+    sobelx = cv2.Sobel(l_channel, cv2.CV_64F, 1, 0, ksize= sobel_kernel) # Take the derivative in x
     abs_sobelx = np.absolute(sobelx) # Absolute x derivative to accentuate lines away from horizontal
     scaled_sobel = np.uint8(255*abs_sobelx/np.max(abs_sobelx))
     
-    # Gradient direction
-    sobely = cv2.Sobel(s_channel, cv2.CV_64F, 0, 1, ksize= sobel_kernel)
-    abs_sobely = np.absolute(sobely)
-    grad_dir = np.arctan2(abs_sobely, abs_sobelx)
+    # Gradient on Y Dir
+    sobely = cv2.Sobel(l_channel, cv2.CV_64F, 0, 1, ksize= sobel_kernel)
+    abs_sobely = np.absolute(sobely) # Absolute x derivative to accentuate lines away from horizontal
+    scaled_sobel_y = np.uint8(255*abs_sobely/np.max(abs_sobely))
 
-    # Threshold gradient direction
-    binary_dir_output = np.zeros_like(sobelx)
-    binary_dir_output[(grad_dir >= dir_thresh[0]) & (grad_dir <= dir_thresh[1])] = 1
+    # magnitue of sobel gradient in X & Y Diredction
+    sobel_abs_mag = np.sqrt(sobelx**2 + sobely**2)
+    scale_factor_mag = np.max(sobel_abs_mag)/255 
+    scaled_sobel_mag = (sobel_abs_mag/scale_factor_mag).astype(np.uint8) 
 
-    # Threshold x gradient on S-channel
+    # plt.imshow(scaled_sobel_mag)
+    # plt.show()
+
+    # find direction of gradient
+    dirGrad = np.arctan2(abs_sobely, abs_sobelx)
+    if disablePlot == False:
+        plt.imshow(dirGrad)
+        plt.text(100,200, "Grad DIR", fontsize=12, color='white')
+        plt.show()
+
+    # starts applying threshold 
+    binary_output_dir = np.zeros_like(sobelx)
+    binary_output_dir[(dirGrad > dir_thresh[0]) & (dirGrad <= dir_thresh[1])] = 1
+
+    if disablePlot == False:
+        plt.imshow(binary_output_dir)
+        plt.text(100,200, "binary on Grad DIR", fontsize=12, color='white')
+        plt.show()
+
+    # threshold for sobel magnitude of sobel gradient in X & Y direction
+    binary_output_mag = np.zeros_like(scaled_sobel_mag)
+    binary_output_mag[(scaled_sobel_mag >= mag_thresh[0]) & (scaled_sobel_mag <= mag_thresh[1])] = 1
+    
+    if disablePlot == False:
+        plt.imshow(binary_output_mag)
+        plt.text(100,200, "binary on Mag", fontsize=12, color='white')
+        plt.show()
+
+    # Threshold for x gradient on L-channel
     sxbinary = np.zeros_like(scaled_sobel)
     sxbinary[(scaled_sobel >= sobelx_thresh[0]) & (scaled_sobel <= sobelx_thresh[1])] = 1
     
-    # Threshold color channel
+    if disablePlot == False:
+        plt.imshow(sxbinary)
+        plt.text(100,200, "binary on Grad X", fontsize=12, color='white')
+        plt.show()
+
+    # Threshold for Y gradient on L-channel (same threshold as X)
+    sybinary = np.zeros_like(scaled_sobel_y)
+    sybinary[(scaled_sobel_y >= sobelx_thresh[0]) & (scaled_sobel_y <= sobelx_thresh[1])] = 1
+    
+    if disablePlot == False:
+        plt.imshow(sybinary)
+        plt.text(100,200, "binary on Grad Y", fontsize=12, color='white')
+        plt.show()
+
+    # Threshold color channel - S
     s_binary = np.zeros_like(s_channel)
     s_binary[(s_channel >= s_thresh[0]) & (s_channel <= s_thresh[1])] = 1
 
-    sl_binary = np.zeros_like(l_channel)
-    sl_binary[(l_channel >= 70) & (l_channel <= s_thresh[1])] = 1
+    if disablePlot == False:
+        plt.imshow(s_binary)
+        plt.text(100,200, "binary on S channel", fontsize=12, color='white')
+        plt.show()
 
-    color_binary = np.zeros_like(binary_dir_output)
-    color_binary[ ((sxbinary == 1) & (binary_dir_output == 1)) & ((s_binary == 1) & (sl_binary == 1)) ] = 1
-    color_binary = color_binary * 255
+	# Threshold color channel - L
+    sl_binary = np.zeros_like(l_channel)
+    sl_binary[(l_channel >= 100) & (l_channel <= s_thresh[1])] = 1
+    
+    if disablePlot == False:
+        plt.imshow(sl_binary)
+        plt.text(100,200, "binary on L channel", fontsize=12, color='white')
+        plt.show()
+
+    color_binary = np.zeros_like(binary_output_mag)
+    # color_binary[ ((sxbinary == 1) & (binary_dir_output == 1)) & ((s_binary == 1) | (sl_binary == 1)) ] = 1
+
+    color_binary[ ((sxbinary == 1) & (sybinary == 1)) |  ((binary_output_mag == 1) & (binary_output_dir == 1)) | ( (sl_binary == 1) & (s_binary == 1)) ] = 1
+    color_binary = color_binary #* 255
     # plt.imshow(color_binary)
+    # plt.text(100,200, "Combined", fontsize=12, color='white')
     # plt.show()
     # Stack each channel
     # color_binary = np.dstack(( np.zeros_like(sxbinary), sxbinary, s_binary)) * 255

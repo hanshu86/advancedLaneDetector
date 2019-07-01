@@ -22,17 +22,21 @@ video = True
 def advanced_lane_detection_pipeline(testimage):
 	global showOnlyFinalImage
 	global video
+	interMediateImagePlot = False
 	# First correct image for distortion
 	correctedImage = undistortImage(testimage)
-	# showImageForComparison(testimage, correctedImage, "Original Image", "undistort Image", gray_new_img=False, text=None)
+	if interMediateImagePlot == True:
+		showImageForComparison(testimage, correctedImage, "Original Image", "undistort Image", gray_new_img=False, text=None)
 
 	# Then Apply perspective transformation to undistorted image
 	warpedImage = getWarpedImage(correctedImage)
-	# showImageForComparison(testimage, warpedImage, "Original Image", "Warped Image", gray_new_img=False, text=None)
+	if interMediateImagePlot == True:
+		showImageForComparison(testimage, warpedImage, "Original Image", "Warped Image", gray_new_img=False, text=None)
 
 	# Then apply binary threshold using sobel filter, color selection
 	binary_image = getThresholdBinaryImage(warpedImage)
-	# showImageForComparison(testimage, binary_image, "Original Image", "Binary Image", gray_new_img=True, text=None)
+	if interMediateImagePlot == True:
+		showImageForComparison(testimage, binary_image, "Original Image", "Binary Image", gray_new_img=True, text=None)
 
 	final_image, left_lane_radius_m, right_lane_radius_m, vehicle_offset_m = fit_polynomial(binary_image, testimage, correctedImage, showOnlyFinalImage)
 
@@ -44,10 +48,10 @@ def advanced_lane_detection_pipeline(testimage):
 	else:
 		text = "Radius: "+str(left_lane_radius_m)+"m" + "\noffset is at center: "+str(vehicle_offset_m)+"m"
 
-	if (showOnlyFinalImage == False) and (video == False):
-		plt.text(400, 100, text, fontsize=12, color='white')
-		plt.imshow(final_image)
-		plt.show()
+	# if (showOnlyFinalImage == False) and (video == False):
+	# 	plt.text(400, 100, text, fontsize=12, color='white')
+	# 	plt.imshow(final_image)
+	# 	plt.show()
 
 	if (video == True):
 		text = "Radius: "+str(left_lane_radius_m)+"m"
@@ -75,22 +79,31 @@ def main():
 	if arg == "images":
 		print("Advanced Lane detection on Images")
 		video = False
-		laneimages = glob.glob('../video_debug_image/videoImage*.jpg')
+		# laneimages = glob.glob('../video_debug_image/videoImagePrblm*.jpg')
+		laneimages = glob.glob('../test_images/*.jpg')
 		for img in laneimages:
-			print(img)
-			# img = "../video_debug_image/videoImage14.jpg"
+			# print(img)
+			# img = "../video_debug_image/videoImageOther14.jpg"
+			# img = "../video_debug_image/videoImage7.jpg"
+			# img = "../video_debug_image/videoImageLast4.jpg"
+			# img = "../video_debug_image/videoImageLast0.jpg"
+			# img ="../video_debug_image/videoImageLast10.jpg"
+			# img = "../video_debug_image/videoImagePrblm4.jpg"
 			image = mpimg.imread(img)
 			pipeline_output_image, text = advanced_lane_detection_pipeline(image)
-			showImageForComparison(image, pipeline_output_image, "Original Image", "Final Image", gray_new_img=False, text=text)
+			# showImageForComparison(image, pipeline_output_image, "Original Image", "Final Image", gray_new_img=False, text=text)
+			outputPath = "../output_images/"+img.split('/')[2]
+			cv2.putText(pipeline_output_image, text, (200,140), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), lineType=cv2.LINE_AA)
+			mpimg.imsave(outputPath, pipeline_output_image)
 			# break
 	elif arg == "video":
 		print("Advanced Lane detection on Video")
 		video = True
-		clip = VideoFileClip("../project_video.mp4").subclip(39, 39.6)
+		clip = VideoFileClip("../project_video.mp4")#.subclip(39.8, 40.2) # 1- 1.5 sec & 39 - 39.6 & 41.3 - 42, 39.8 - 40.2
 		#Debugging as video between 39sec and 39.6 sec giving weird lane
-		clip.write_images_sequence("../video_debug_image/videoImage%01d.jpg")
-		#white_clip = clip.fl_image(advanced_lane_detection_pipeline)
-		#white_clip.write_videofile("../myprojectOutput.mp4", audio=False)
+		# clip.write_images_sequence("../video_debug_image/videoImagePrblm%01d.jpg")
+		white_clip = clip.fl_image(advanced_lane_detection_pipeline)
+		white_clip.write_videofile("../myprojectOutput.mp4", audio=False)
 
 	else:
 		print("Advanced Lane detection on Video")
