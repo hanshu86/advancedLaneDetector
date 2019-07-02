@@ -7,6 +7,8 @@ import matplotlib.image as mpimg
 def getThresholdBinaryImage(img, s_thresh=(170, 255), sobelx_thresh=(50, 200), dir_thresh=(0, np.pi/8), sobel_kernel=5):
     mag_thresh=(50, 255)
     disablePlot = True
+
+    return getThresholdBinaryImageNew(img, disablePlot)
     # Convert to HLS color space and separate the V channel
     #image MUST be open using mpimg.imread(). If used cv2.imread
     # then change cv2.COLOR_RGB2HLS -> cv2.COLOR_BGR2HLS
@@ -117,3 +119,88 @@ def getThresholdBinaryImage(img, s_thresh=(170, 255), sobelx_thresh=(50, 200), d
     # Stack each channel
     # color_binary = np.dstack(( np.zeros_like(sxbinary), sxbinary, s_binary)) * 255
     return color_binary
+
+
+
+def getThresholdBinaryImageNew(img, disablePlot):
+    luv = cv2.cvtColor(img, cv2.COLOR_RGB2LUV)
+    l_channel = luv[:,:,0]
+    u_channel = luv[:,:,1]
+    v_channel = luv[:,:,2]
+
+    if disablePlot == False:
+        plt.imshow(l_channel)
+        plt.text(100,200, "LUV-L - Channel", fontsize=12, color='white')
+        plt.show()
+        plt.imshow(u_channel)
+        plt.text(100,200, "U - Channel", fontsize=12, color='white')
+        plt.show()
+        plt.imshow(v_channel)
+        plt.text(100,200, "V - Channel", fontsize=12, color='white')
+        plt.show()
+
+    lab = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
+    l_lab_channel = lab[:,:,0]
+    a_lab_channel = lab[:,:,1]
+    b_lab_channel = lab[:,:,2]
+
+    if disablePlot == False:
+        plt.imshow(l_lab_channel)
+        plt.text(100,200, "L-LAB - Channel", fontsize=12, color='white')
+        plt.show()
+        plt.imshow(a_lab_channel)
+        plt.text(100,200, "A - Channel", fontsize=12, color='white')
+        plt.show()
+        plt.imshow(b_lab_channel)
+        plt.text(100,200, "B - Channel", fontsize=12, color='white')
+        plt.show()
+
+
+    # for white line
+    l_luv_binary = np.zeros_like(l_channel)
+    l_luv_binary[(l_channel >= 190) & (l_channel <= 255)] = 1
+
+    if disablePlot == False:
+        plt.imshow(l_luv_binary)
+        plt.text(100,200, "L-LUV - Binary", fontsize=12, color='white')
+        plt.show()
+
+    l_lab_binary = np.zeros_like(l_lab_channel)
+    l_lab_binary[(l_lab_channel >= 190) & (l_lab_channel <= 255)] = 1
+
+    if disablePlot == False:
+        plt.imshow(l_lab_binary)
+        plt.text(100,200, "L-LAB - Binary", fontsize=12, color='white')
+        plt.show()
+
+    # For Yellow line
+    v_channel_binary = np.zeros_like(v_channel)
+    v_channel_binary[(v_channel >= 170) & (v_channel <= 255)] = 1
+
+    if disablePlot == False:
+        plt.imshow(v_channel_binary)
+        plt.text(100,200, "V-LUV - Binary", fontsize=12, color='white')
+        plt.show()
+
+    b_channel_binary = np.zeros_like(b_lab_channel)
+    b_channel_binary[(b_lab_channel >= 155) & (b_lab_channel <= 255)] = 1
+
+    if disablePlot == False:
+        plt.imshow(b_channel_binary)
+        plt.text(100,200, "B-LAB - Binary", fontsize=12, color='white')
+        plt.show()
+
+    combined_binary = np.zeros_like(b_channel_binary)
+    combined_binary[ ((l_luv_binary == 1) & (l_lab_binary == 1)) |  ((v_channel_binary == 1) & (b_channel_binary == 1)) ] = 1
+
+    if disablePlot == False:
+        plt.imshow(combined_binary)
+        plt.text(100,200, "Luv/Lab - Binary", fontsize=12, color='white')
+        plt.show()
+
+    return combined_binary
+
+
+
+
+

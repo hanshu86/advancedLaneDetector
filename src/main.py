@@ -40,6 +40,7 @@ def advanced_lane_detection_pipeline(testimage):
 
 	final_image, left_lane_radius_m, right_lane_radius_m, vehicle_offset_m = fit_polynomial(binary_image, testimage, correctedImage, showOnlyFinalImage)
 
+
 	# write text on final image. Choose any lane for radius as both are same
 	if vehicle_offset_m < 0:
 		text = "Radius: "+str(left_lane_radius_m)+"m" + "\noffset to left: "+str(abs(vehicle_offset_m))+"m"
@@ -79,29 +80,33 @@ def main():
 	if arg == "images":
 		print("Advanced Lane detection on Images")
 		video = False
-		# laneimages = glob.glob('../video_debug_image/videoImagePrblm*.jpg')
-		laneimages = glob.glob('../test_images/*.jpg')
+		laneimages = glob.glob('../video_debug_image/videoImageReview*.jpg')
+		# laneimages = glob.glob('../test_images/*.jpg')
 		for img in laneimages:
-			# print(img)
+			print(img)
 			# img = "../video_debug_image/videoImageOther14.jpg"
 			# img = "../video_debug_image/videoImage7.jpg"
 			# img = "../video_debug_image/videoImageLast4.jpg"
 			# img = "../video_debug_image/videoImageLast0.jpg"
 			# img ="../video_debug_image/videoImageLast10.jpg"
 			# img = "../video_debug_image/videoImagePrblm4.jpg"
+			img = "../video_debug_image/videoImageReview15.jpg"
 			image = mpimg.imread(img)
 			pipeline_output_image, text = advanced_lane_detection_pipeline(image)
-			# showImageForComparison(image, pipeline_output_image, "Original Image", "Final Image", gray_new_img=False, text=text)
-			outputPath = "../output_images/"+img.split('/')[2]
-			cv2.putText(pipeline_output_image, text, (200,140), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), lineType=cv2.LINE_AA)
-			mpimg.imsave(outputPath, pipeline_output_image)
-			# break
+			showImageForComparison(image, pipeline_output_image, "Original Image", "Final Image", gray_new_img=False, text=text)
+
+			# outputPath = "/tmp/image/"+img.split('/')[2]
+			# cv2.putText(pipeline_output_image, text, (200,140), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), lineType=cv2.LINE_AA)
+			# mpimg.imsave(outputPath, pipeline_output_image)
+
+			break
 	elif arg == "video":
 		print("Advanced Lane detection on Video")
 		video = True
-		clip = VideoFileClip("../project_video.mp4")#.subclip(39.8, 40.2) # 1- 1.5 sec & 39 - 39.6 & 41.3 - 42, 39.8 - 40.2
+		clip = VideoFileClip("../project_video.mp4")#.subclip(41, 43) # 1- 1.5 sec & 39 - 39.6 & 41.3 - 42, 39.8 - 40.2, 23 - 25
 		#Debugging as video between 39sec and 39.6 sec giving weird lane
-		# clip.write_images_sequence("../video_debug_image/videoImagePrblm%01d.jpg")
+		# clip.write_images_sequence("../video_debug_image/videoImageReview%01d.jpg")
+
 		white_clip = clip.fl_image(advanced_lane_detection_pipeline)
 		white_clip.write_videofile("../myprojectOutput.mp4", audio=False)
 

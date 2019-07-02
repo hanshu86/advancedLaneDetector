@@ -3,6 +3,7 @@ import cv2
 import matplotlib.pyplot as plt 
 import matplotlib.image as mpimg
 import glob
+import scipy
 
 # user defined imports
 from undistort import undistortImage
@@ -120,14 +121,38 @@ def find_lane_pixels(binary_warped):
 	return leftx, lefty, rightx, righty, out_img
 
 
+def is_distance_good(left_fit, right_fit, binary_warped):
+	isGood = True
+	smally = np.linspace(0, binary_warped.shape[0]-1, 3 )
+	#print(smally)
+	x_left = left_fit[0]*smally**2 + left_fit[1]*smally + left_fit[2]
+	x_right = right_fit[0]*smally**2 + right_fit[1]*smally + right_fit[2]
+	dist = (x_right - x_left)
+	#print(dist)
+	for i in range(0, len(dist)):
+		if dist[i] < 800 or dist[i] > 1100:
+			isGood = False
+			break
+	return isGood
+
 # From Quiz
 def fit_polynomial(binary_warped, org_image, undist_image, showOnlyFinalImage):
+	#showOnlyFinalImage = False
 	# Find our lane pixels first
 	leftx, lefty, rightx, righty, out_img = find_lane_pixels(binary_warped)
 
 	# Fit a second order polynomial to each using `np.polyfit` ###
 	left_fit = np.polyfit(lefty, leftx, 2)
 	right_fit = np.polyfit(righty, rightx, 2)
+
+	isLaneProperlySeparated = is_distance_good(left_fit, right_fit, binary_warped)
+	if isLaneProperlySeparated == False:
+		# print("In this Frame Lane lines are NOT properly separated.. Use lane lines from previous Frame")
+		left_fit = np.load('leftFit.npy')
+		right_fit = np.load('rightFit.npy')
+	else:
+		np.save('leftFit.npy', left_fit)
+		np.save('rightFit.npy', right_fit)
 
 	# Generate x and y values for plotting
 	ploty = np.linspace(0, binary_warped.shape[0]-1, binary_warped.shape[0] )
