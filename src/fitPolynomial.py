@@ -191,11 +191,12 @@ def fit_polynomial(binary_warped, org_image, undist_image, showOnlyFinalImage):
 	right_curve_rad = get_curvead(right_fit_cr[0], right_fit_cr[1], y_eval*ym_per_pix)  ## right lane radius
 
 	# Now get the position of the vehicle
+	# Vehicle offset = (lane mean position using identified lane coordinates) – (image mean position using image size) * xm_per_pix
 	camera_pos = binary_warped.shape[1]/2
 	left_xfit_pos =  left_fit[0] * binary_warped.shape[0]**2 + left_fit[1] * binary_warped.shape[0] + left_fit[2]
 	right_xfit_pos =  right_fit[0] * binary_warped.shape[0]**2 + right_fit[1] * binary_warped.shape[0] + right_fit[2]
 	lane_middle_pos = (left_xfit_pos + right_xfit_pos)/2
-	car_offset = (camera_pos - lane_middle_pos) * xm_per_pix
+	car_offset = (lane_middle_pos - camera_pos) * xm_per_pix
 
 	final_img = drawOnLane(binary_warped, left_fitx, right_fitx, ploty, org_image, undist_image)
 
