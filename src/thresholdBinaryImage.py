@@ -4,11 +4,9 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
 
-def getThresholdBinaryImage(img, s_thresh=(170, 255), sobelx_thresh=(50, 200), dir_thresh=(0, np.pi/8), sobel_kernel=5):
+def getThresholdBinaryImageHLS(img, s_thresh=(170, 255), sobelx_thresh=(50, 200), dir_thresh=(0, np.pi/8), sobel_kernel=5):
     mag_thresh=(50, 255)
     disablePlot = True
-
-    return getThresholdBinaryImageNew(img, disablePlot)
     # Convert to HLS color space and separate the V channel
     #image MUST be open using mpimg.imread(). If used cv2.imread
     # then change cv2.COLOR_RGB2HLS -> cv2.COLOR_BGR2HLS
@@ -122,7 +120,7 @@ def getThresholdBinaryImage(img, s_thresh=(170, 255), sobelx_thresh=(50, 200), d
 
 
 
-def getThresholdBinaryImageNew(img, disablePlot):
+def getThresholdBinaryImageLUVLAB(img, sobel_kernel=5, disablePlot=True):
     luv = cv2.cvtColor(img, cv2.COLOR_RGB2LUV)
     l_channel = luv[:,:,0]
     u_channel = luv[:,:,1]
@@ -155,6 +153,15 @@ def getThresholdBinaryImageNew(img, disablePlot):
         plt.text(100,200, "B - Channel", fontsize=12, color='white')
         plt.show()
 
+    # Gradient on L channel of LAB color space X direction
+    sobelx_lab = cv2.Sobel(l_lab_channel, cv2.CV_64F, 1, 0, ksize=sobel_kernel) # Take the derivative in x
+    abs_sobelx_lab = np.absolute(sobelx_lab) # Absolute x derivative to accentuate lines away from horizontal
+    scaled_sobel_l_lab = np.uint8(255*abs_sobelx_lab/np.max(abs_sobelx_lab))
+
+    # Gradient on B channel of LAB color space X direction
+    sobelx_b_lab = cv2.Sobel(b_lab_channel, cv2.CV_64F, 1, 0, ksize=sobel_kernel) # Take the derivative in x
+    abs_sobelx_b_lab = np.absolute(sobelx_b_lab) # Absolute x derivative to accentuate lines away from horizontal
+    scaled_sobel_b_lab = np.uint8(255*abs_sobelx_b_lab/np.max(abs_sobelx_b_lab))
 
     # for white line
     l_luv_binary = np.zeros_like(l_channel)
@@ -171,6 +178,14 @@ def getThresholdBinaryImageNew(img, disablePlot):
     if disablePlot == False:
         plt.imshow(l_lab_binary)
         plt.text(100,200, "L-LAB - Binary", fontsize=12, color='white')
+        plt.show()
+
+    sxbinary_l_lab = np.zeros_like(scaled_sobel_l_lab)
+    sxbinary_l_lab[(scaled_sobel_l_lab >= 50) & (scaled_sobel_l_lab <= 200)] = 1
+
+    if disablePlot == False:
+        plt.imshow(sxbinary_l_lab)
+        plt.text(100,200, "L-LAB Grad - Binary", fontsize=12, color='white')
         plt.show()
 
     # For Yellow line
@@ -190,8 +205,23 @@ def getThresholdBinaryImageNew(img, disablePlot):
         plt.text(100,200, "B-LAB - Binary", fontsize=12, color='white')
         plt.show()
 
+    sxbinary_b_lab = np.zeros_like(scaled_sobel_b_lab)
+    sxbinary_b_lab[(scaled_sobel_b_lab >= 50) & (scaled_sobel_b_lab <= 200)] = 1
+
+    if disablePlot == False:
+        plt.imshow(sxbinary_b_lab)
+        plt.text(100,200, "B-LAB Grad - Binary", fontsize=12, color='white')
+        plt.show()
+
     combined_binary = np.zeros_like(b_channel_binary)
-    combined_binary[ ((l_luv_binary == 1) & (l_lab_binary == 1)) |  ((v_channel_binary == 1) & (b_channel_binary == 1)) ] = 1
+
+    # combined_binary[ ((l_luv_binary == 1) & (l_lab_binary == 1)) | 
+    #                  ((v_channel_binary == 1) & (b_channel_binary == 1) ) ] = 1
+
+    combined_binary[ ((l_luv_binary == 1) & (l_lab_binary == 1)) | 
+                     (sxbinary_l_lab == 1) | 
+                     ((v_channel_binary == 1) & (b_channel_binary == 1)) |
+                     (sxbinary_b_lab == 1) ] = 1
 
     if disablePlot == False:
         plt.imshow(combined_binary)

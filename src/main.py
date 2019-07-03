@@ -34,12 +34,12 @@ def advanced_lane_detection_pipeline(testimage):
 		showImageForComparison(testimage, warpedImage, "Original Image", "Warped Image", gray_new_img=False, text=None)
 
 	# Then apply binary threshold using sobel filter, color selection
-	binary_image = getThresholdBinaryImage(warpedImage)
+	# binary_image = getThresholdBinaryImageHLS(warpedImage)
+	binary_image = getThresholdBinaryImageLUVLAB(warpedImage) # this is much better than HLS in finding lane lines
 	if interMediateImagePlot == True:
 		showImageForComparison(testimage, binary_image, "Original Image", "Binary Image", gray_new_img=True, text=None)
 
 	final_image, left_lane_radius_m, right_lane_radius_m, vehicle_offset_m = fit_polynomial(binary_image, testimage, correctedImage, showOnlyFinalImage)
-
 
 	# write text on final image. Choose any lane for radius as both are same
 	if vehicle_offset_m < 0:
@@ -68,8 +68,6 @@ def advanced_lane_detection_pipeline(testimage):
 	else:
 		return final_image, text
 
-def extract_frames(images):
-	return images
 
 
 def main():
@@ -80,30 +78,30 @@ def main():
 	if arg == "images":
 		print("Advanced Lane detection on Images")
 		video = False
-		laneimages = glob.glob('../video_debug_image/videoImageReview*.jpg')
-		# laneimages = glob.glob('../test_images/*.jpg')
+		# laneimages = glob.glob('../video_debug_image/videoImageReview*.jpg')
+		laneimages = glob.glob('../test_images/*.jpg')
 		for img in laneimages:
-			print(img)
+			# print(img)
 			# img = "../video_debug_image/videoImageOther14.jpg"
 			# img = "../video_debug_image/videoImage7.jpg"
 			# img = "../video_debug_image/videoImageLast4.jpg"
 			# img = "../video_debug_image/videoImageLast0.jpg"
 			# img ="../video_debug_image/videoImageLast10.jpg"
 			# img = "../video_debug_image/videoImagePrblm4.jpg"
-			img = "../video_debug_image/videoImageReview15.jpg"
+			# img = "../video_debug_image/videoImageReview15.jpg"
 			image = mpimg.imread(img)
 			pipeline_output_image, text = advanced_lane_detection_pipeline(image)
-			showImageForComparison(image, pipeline_output_image, "Original Image", "Final Image", gray_new_img=False, text=text)
+			# showImageForComparison(image, pipeline_output_image, "Original Image", "Final Image", gray_new_img=False, text=text)
 
-			# outputPath = "/tmp/image/"+img.split('/')[2]
-			# cv2.putText(pipeline_output_image, text, (200,140), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), lineType=cv2.LINE_AA)
-			# mpimg.imsave(outputPath, pipeline_output_image)
+			outputPath = "../output_images/"+img.split('/')[2]
+			cv2.putText(pipeline_output_image, text, (200,140), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), lineType=cv2.LINE_AA)
+			mpimg.imsave(outputPath, pipeline_output_image)
 
-			break
+			# break
 	elif arg == "video":
 		print("Advanced Lane detection on Video")
 		video = True
-		clip = VideoFileClip("../project_video.mp4")#.subclip(41, 43) # 1- 1.5 sec & 39 - 39.6 & 41.3 - 42, 39.8 - 40.2, 23 - 25
+		clip = VideoFileClip("../project_video.mp4")#.subclip(20, 30) # 1- 1.5 sec & 39 - 39.6 & 41.3 - 42, 39.8 - 40.2, 23 - 25
 		#Debugging as video between 39sec and 39.6 sec giving weird lane
 		# clip.write_images_sequence("../video_debug_image/videoImageReview%01d.jpg")
 

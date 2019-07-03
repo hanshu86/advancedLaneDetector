@@ -180,7 +180,7 @@ def fit_polynomial(binary_warped, org_image, undist_image, showOnlyFinalImage):
 
 	# assume the lane is about 30 meters long and 3.7 meters wide
 	# Define conversions in x and y from pixels space to meters
-	ym_per_pix = 30/720 # meters per pixel in y dimension
+	ym_per_pix = 12/720 # meters per pixel in y dimension
 	xm_per_pix = 3.7/980 # meters per pixel in x dimension (1280 org size. perspective transform --->100 (980) <---200)
 	y_eval = np.max(ploty) # bottom of the image
 	# Fit new polynomials to x,y in world space
@@ -192,8 +192,8 @@ def fit_polynomial(binary_warped, org_image, undist_image, showOnlyFinalImage):
 
 	# Now get the position of the vehicle
 	camera_pos = binary_warped.shape[1]/2
-	left_xfit_pos =  left_fit[0] * binary_warped.shape[0] * binary_warped.shape[1] + left_fit[1] * binary_warped.shape[0] + left_fit[2]
-	right_xfit_pos =  right_fit[0] * binary_warped.shape[0] * binary_warped.shape[1] + right_fit[1] * binary_warped.shape[0] + right_fit[2]
+	left_xfit_pos =  left_fit[0] * binary_warped.shape[0]**2 + left_fit[1] * binary_warped.shape[0] + left_fit[2]
+	right_xfit_pos =  right_fit[0] * binary_warped.shape[0]**2 + right_fit[1] * binary_warped.shape[0] + right_fit[2]
 	lane_middle_pos = (left_xfit_pos + right_xfit_pos)/2
 	car_offset = (camera_pos - lane_middle_pos) * xm_per_pix
 

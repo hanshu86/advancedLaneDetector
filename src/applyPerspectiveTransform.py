@@ -51,7 +51,9 @@ def getWarpedImage(img):
 
 
 # PLEASE UNCOMMENT ME FOR RUNNING THIS FILE ONLY
-# distortedImage = mpimage.imread('../test_images/test1.jpg')
+# distortedImage = mpimage.imread('../test_images/straight_lines2.jpg')
 # imageCorr = undistortImage(distortedImage)
 # warpedImg = getWarpedImage(imageCorr)
 # showImageForComparison(distortedImage, warpedImg, "Original Image", "warped Image", gray_new_img=False, text=None)
+# plt.imshow(warpedImg)
+# plt.show()
