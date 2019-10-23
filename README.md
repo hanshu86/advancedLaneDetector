@@ -157,10 +157,13 @@ For video pipeline, I used the same pipeline as above. The output of the video i
 The link to output video:
 
 https://github.com/hanshu86/advancedLaneDetector/blob/master/myprojectOutput.mp4
-Project Analysis:
-•    I found this project needed a lot of tuning especially what filter we should choose to generate reliable binary image (S-channel, L-Channel, X & Y Grad). In some portion of the video it was hard to identify lanes because of different lighting condition mixed with transition in lane color (from dark to light or vice versa). 
-•    For debugging those video portion, I converted them into images and then tuned my binary threshold to generate best binary image (these can be found in video_debug_image directory).
-•    My pipeline is slow. Its taking ~2 min 10 sec to generate output video file. I think this can be significantly improved by using hysteresis on lane detection (carrying lane detection information from previous image to current image).
-•    Rain and snow condition will definitely be tough to detect lane with this pipeline. This can be future enhancement to this pipeline.
-•    I am observing some jitter in lane detection. This is an area for further improvement.
+
+
+### Future Enhancements:
+
+1. I found this project needed a lot of tuning especially what filter we should choose to generate reliable binary image (S-channel, L-Channel, X & Y Grad). In some portion of the video it was hard to identify lanes because of different lighting condition mixed with transition in lane color (from dark to light or vice versa). 
+2. For debugging those video portion, I converted them into images and then tuned my binary threshold to generate best binary image (these can be found in video_debug_image directory).
+3. My pipeline is slow. Its taking ~2 min 10 sec to generate output video file. I think this can be significantly improved by using hysteresis on lane detection (carrying lane detection information from previous image to current image).
+4. Rain and snow condition will definitely be tough to detect lane with this pipeline. This can be future enhancement to this pipeline.
+5.  I am observing some jitter in lane detection. This is an area for further improvement.
 
